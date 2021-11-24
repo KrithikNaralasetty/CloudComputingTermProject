@@ -8,6 +8,11 @@ module.exports = {
       'sans': ['Montserrat', ...defaultTheme.fontFamily.sans],
       'serif': [...defaultTheme.fontFamily.serif],
       'mono': [...defaultTheme.fontFamily.mono]
+    },
+    extend: {
+      gridTemplateColumns: {
+        '7': 'repeat(7, 1fr)'
+      }
     }
     /*backgroundColor: theme => ({
       ...theme('colors'),
