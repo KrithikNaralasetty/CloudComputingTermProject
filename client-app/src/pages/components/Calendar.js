@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import classNames from "classnames";
+
 import {
   daysOfWeek,
   createDaysForCurrentMonth,
@@ -12,7 +13,7 @@ import {
 
 import { BiChevronLeft, BiChevronRight } from 'react-icons/bi'
 
-Calendar.propTypes = {
+Calendar.propTypes = { //This is basically the parameters you need to pass when calling <Calendar />
   className: PropTypes.string,
   yearAndMonth: PropTypes.arrayOf(PropTypes.number).isRequired, // e.g. [2021, 6] for June 2021
   onYearAndMonthChange: PropTypes.func.isRequired,
@@ -75,7 +76,7 @@ export default function Calendar({
     <div className="calendar-root px-24 py-10 rounded-2xl bg-yellow-400 shadow-xl">
 
       <div className="navigation-header flex flex-row space-x-12 justify-center text-white">
-        <BiChevronLeft className="text-6xl" onClick={handleMonthNavBackButtonClick} />
+        <BiChevronLeft className="text-6xl hover:text-gray-500" onClick={handleMonthNavBackButtonClick} />
         <select
           className="month-select text-3xl border-none bg-yellow-400"
           value={month}
@@ -98,7 +99,7 @@ export default function Calendar({
             </option>
           ))}
         </select>
-        <BiChevronRight className="text-6xl" onClick={handleMonthNavForwardButtonClick} />
+        <BiChevronRight className="text-6xl hover:text-gray-500" onClick={handleMonthNavForwardButtonClick} />
       </div>
 
         {/*------------Days of Week--------------*/}
@@ -108,7 +109,7 @@ export default function Calendar({
           <div
             key={day}
             className={classNames("day-of-week-header-cell p-1", {
-              "text-gray-500": [6, 0].includes(index)
+              "text-gray-500": [6, 0].includes(index) //if it's a weekend day 0: Sunday, or 6: Saturday
             })}
           >
             {day}
@@ -123,8 +124,8 @@ export default function Calendar({
           <div
             key={day.dateString}
             className={classNames("day-grid-item-container flex flex-col relative p-5 hover:text-opacity-50", {
-              "weekend-day": isWeekendDay(day.dateString),
-              "text-white text-opacity-100": day.isCurrentMonth
+              "weekend-day": isWeekendDay(day.dateString), //if true, then add class to list
+              "text-white text-opacity-100": day.isCurrentMonth // if is current month, add those classes to list. true false
             })}
           >
             <div className="day-content-wrapper relative min-h-0">{renderDay(day)}</div>

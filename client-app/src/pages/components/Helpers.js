@@ -16,6 +16,8 @@ export const daysOfWeek = [
   "Sat"
 ];
 
+
+
 export function getYearDropdownOptions(currentYear) {
   let minYear = currentYear - 4;
   let maxYear = currentYear + 5;
