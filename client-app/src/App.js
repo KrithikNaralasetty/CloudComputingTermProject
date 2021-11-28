@@ -12,10 +12,7 @@ import ErrorPage from "./pages/ErrorPage"
 
 function App() {
 
-  const adminUser = {
-    username: "Aristos",
-    password: "admin123"
-  }
+  
 
   /*--------------Login----------------*/
 
@@ -27,22 +24,26 @@ function App() {
       console.log(details)
 
       //check if credentials are correct
-      //should send data to node js to see if logged in.
-      //axios.post("http://localhost:3001/users/signin", {} )
-
-      if (details.username === adminUser.username && details.password === adminUser.password) {
-        console.log("Logged in");
-        setUser ({
-          username: details.username
-          //could have email I guess? idk how to set it
-          //email: comes from node js packet
-        })  
-        //React router redirect to dashboard
-        navigate("/dashboard")   
-      } else {
-        console.log("Credentials do not match")
-        setError("Credentials do not match")
-      }
+      //should send data to noded js to see if logged in.
+      axios.get("localhost:3001/api/login")
+      .then(response => {
+        if (response.data.isValid) {
+          console.log("Logged in");
+          setUser ({
+            username: details.username
+            //email: response.data.user.email //with DB, can fetch email
+          })  
+          //React router redirect to dashboard
+          navigate("/dashboard")   
+        } else {
+          console.log("Credentials do not match")
+          setError("Credentials do not match")
+        }
+      })
+      .catch(error => {
+        console.log(error)
+        setError(error.message)
+      })    
   }
 
   const Logout = () => {
