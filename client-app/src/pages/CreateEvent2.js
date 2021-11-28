@@ -1,5 +1,5 @@
 import StepHeader from "./components/StepHeader"
-import FormInput from "./components/FormInput"
+// import FormInput from "./components/FormInput"
 
 const CreateEvent2 = () => {
     return (
@@ -11,11 +11,11 @@ const CreateEvent2 = () => {
             <div className="flex flex-row justify-between mx-auto w-5/6">
                 <div>
                     <StepHeader num="2" text="Name your event"/>
-                    <FormInput type="name"/> 
+                    {/* <FormInput type="name"/>  */}
                 </div>
                 <div>
                     <StepHeader num="3" text="Add collaborators"/>
-                    <FormInput type="email"/>
+                    {/* <FormInput type="email"/> */}
                     <button className=" my-10 text-3xl border-b-2 border-blue-900 text-blue-900 hover:border-blue-800
                         hover:text-gray-600 cursor-pointer">Add
                     </button> 

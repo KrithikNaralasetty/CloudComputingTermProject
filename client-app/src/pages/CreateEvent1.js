@@ -1,9 +1,11 @@
 import { useState } from "react";
 import Calendar, { CalendarDayHeader } from "./components/Calendar";
 import StepHeader from "./components/StepHeader"
+import {useNavigate} from "react-router-dom"
 
-const CreateEvent1 = () => {
+const CreateEvent1 = ({navigate}) => {
     const [yearAndMonth, setYearAndMonth] = useState([2021, 11]);
+
     return (
         <div className="bg-purple-400 w-full h-full text-center">
             <div className="w-1/2 mx-auto">
@@ -23,6 +25,8 @@ const CreateEvent1 = () => {
                     )}
                 />
             </div>
+            <button onClick={() => { navigate("/dashboard")}} className=" my-10 mx-10 text-4xl border-b-2 border-blue-900 text-blue-900 hover:border-blue-800
+             hover:text-gray-600 cursor-pointer">Cancel</button>
             <button className=" my-10 text-4xl border-b-2 border-blue-900 text-blue-900 hover:border-blue-800
              hover:text-gray-600 cursor-pointer">Next</button>
         </div>
