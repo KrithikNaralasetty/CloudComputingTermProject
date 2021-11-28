@@ -25,10 +25,12 @@ function App() {
 
       //check if credentials are correct
       //should send data to noded js to see if logged in.
-      axios.get("localhost:3001/api/login")
+    
+      axios.post("http://localhost:3001/api/login", details)
       .then(response => {
         if (response.data.isValid) {
           console.log("Logged in");
+          setError("")
           setUser ({
             username: details.username
             //email: response.data.user.email //with DB, can fetch email
