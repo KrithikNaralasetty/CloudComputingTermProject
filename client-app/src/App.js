@@ -25,8 +25,8 @@ function App() {
 
       //check if credentials are correct
       //should send data to noded js to see if logged in.
-    
-      axios.post("http://localhost:3001/api/login", details)
+      //
+      axios.post("http://localhost:4000/api/login", details)
       .then(response => {
         if (response.data.isValid) {
           console.log("Logged in");
@@ -43,7 +43,7 @@ function App() {
         }
       })
       .catch(error => {
-        console.log(error)
+        console.log("hello" + error)
         setError(error.message)
       })    
   }
