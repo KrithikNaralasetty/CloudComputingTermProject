@@ -13,18 +13,18 @@ const app = express();
 
 // connect to db 
 // should consider the pool method with separate db connect file
-const con = mysql.createConnection({
-    host    : 'localhost',
-    port    :  5000,
-    database: 'coen241',
-    password: '12345',
-    user    : 'root'
-})
+// const con = mysql.createConnection({
+//     host    : 'localhost',
+//     port    :  5000,
+//     database: 'coen241',
+//     password: '12345',
+//     user    : 'root'
+// })
 
-con.connect(err => {
-    if (err) throw err;
-    console.log("Connected to the DB!")
-})
+// con.connect(err => {
+//     if (err) throw err;
+//     console.log("Connected to the DB!")
+// })
 
 //enable CORS. You absolutely need this for cross-origin connections between ports on same machine
 app.use(cors())
@@ -36,34 +36,95 @@ app.use(express.static(path.resolve(__dirname, '../client-app/build')));
 
 app.post("/api/login", (req, res) => {
     //query DB for username/passwords of all accounts
-    //conn.getConnection(
-    //function (err, client) {
+    conn.getConnection(
+    function (err, client) {
         const sql = 'SELECT * FROM users WHERE uname = ? AND password = ?';
-        con.query(sql, [req.body.username, req.body.password], function(err, user) {
+        client.query(sql, [req.body.username, req.body.password], function(err, user) {
             console.log("return value" + user)
             console.log(user[0])
             if (err)
                 console.log('Query Error')
 
-            if (user[0].uname === req.body.username) { //match
+            if (user[0]) { //match
                 const data = {
                     isValid: true,
-                    email: user.email
+                    email: user[0].email,
+                    id: user[0].uid
                 }
-                
+                console.log(data.id)
                 res.send(JSON.stringify(data)) 
             }
-            else {
+            else { //no match; wrong credentials
                 const data = {
                     isValid: false
                 }
                 
                 res.send(JSON.stringify(data)) 
             }
-            //client.release()
+            client.release()
         })
-    //})
+    })
 });
+
+app.post("/api/validate-email", (req, res) => {
+    console.log("Checking if email valid:")
+    //query DB for username/passwords of all accounts
+    conn.getConnection(
+        function (err, client) {
+            const sql = 'SELECT * FROM users WHERE email = ?';
+            console.log(req.body.email)
+            client.query(sql, [req.body.email], function(err, user) {
+                //console.log("return value" + user[0]) 
+                if (err)
+                    console.log('Query Error')
+    
+                if (user[0]) { //match     
+                    console.log("Correct Email!")  
+                    const data = {
+                        data: user[0]
+                    }            
+                    res.send(JSON.stringify(data)) 
+                }
+                else { //no match; wrong email
+                    console.log("can't find email")
+                    res.send(JSON.stringify(false)) 
+                }
+                client.release()
+            })
+        })
+
+})
+
+app.post("/api/create-event", (req, res) => {
+    console.log("Creating Event:")
+    conn.getConnection(
+        function (err, client) {
+            const sql = 'INSERT INTO events (eventname, userid, owner, collaborators) VALUES (?, ?, ?, ?)';
+
+            client.query(sql, [req.body.eventname, req.body.userid, req.body.owner, 
+                req.body.collaborators], function(err, result) {
+                
+                if (err)
+                    console.log('Query Error')
+        
+                console.log(result)  
+                
+                const data = {
+                    //eventName: result.eventname,
+                    //id: result.eventid
+                    data: "hello"
+                }            
+                
+                res.send(JSON.stringify(data)) 
+
+                client.release()
+            })
+        })
+
+})
+
+
+
 
 app.get('*', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');

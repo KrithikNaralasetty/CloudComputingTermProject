@@ -1,3 +1,4 @@
+//import { useState } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 
@@ -19,7 +20,10 @@ Calendar.propTypes = { //This is basically the parameters you need to pass when 
   onYearAndMonthChange: PropTypes.func.isRequired,
   renderDay: PropTypes.func
 };
+
 export default function Calendar({
+  dateSelected, //whether or not selected, determines if circle styles will load.
+  selection, //selection state func
   className = "",
   yearAndMonth = [2021, 9],
   onYearAndMonthChange,
@@ -72,6 +76,20 @@ export default function Calendar({
     onYearAndMonthChange([nextYear, nextMonth]);
   };
 
+//------statefulness-------////
+
+//send details once click next is set
+
+const selectedClickHandler = (dayObject) => {
+  //e.preventDefault()
+  //dayObject.isSelected = dateSelected;
+  selection(dayObject.dateString) //passed into calendar
+}
+
+
+
+
+//-------------------------/////
   return (
     <div className="calendar-root px-24 py-10 rounded-2xl bg-yellow-400 shadow-xl">
 
@@ -128,7 +146,16 @@ export default function Calendar({
               "text-white text-opacity-100": day.isCurrentMonth // if is current month, add those classes to list. true false
             })}
           >
-            <div className="day-content-wrapper relative min-h-0">{renderDay(day)}</div>
+            <div onClick={() => selectedClickHandler(day)} 
+            className="day-content-wrapper relative min-h-0">
+              {renderDay(day)} 
+            </div>
+            {/* <div onClick={() => selectedClickHandler(day)} 
+            className={classNames("day-content-wrapper relative min-h-0", {
+              "border-2 rounded-full border-white": dateSelected
+            })}>
+              {renderDay(day)}
+            </div> */}
           </div>
         ))}
       </div>
@@ -141,6 +168,6 @@ CalendarDayHeader.propTypes = {
 };
 export function CalendarDayHeader({ calendarDayObject }) {
   return (
-    <div className="day-grid-item-header">{calendarDayObject.dayOfMonth}</div>
-  );
+    <div className="day-grid-item-header cursor-pointer">{calendarDayObject.dayOfMonth}</div>
+  ); //if selected
 }

@@ -42,7 +42,8 @@ export function createDaysForCurrentMonth(year, month) {
     return {
       dateString: dayjs(`${year}-${month}-${index + 1}`).format("YYYY-MM-DD"), //returns an object, this line returns date string formatted
       dayOfMonth: index + 1, //day date
-      isCurrentMonth: true
+      isCurrentMonth: true,
+      isSelected: false
     };
   }); //all in all, it returns an array of objects each representing a day in the specified month/year
 }
