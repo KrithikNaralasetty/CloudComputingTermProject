@@ -98,21 +98,20 @@ app.post("/api/validate-email", (req, res) => {
 app.post("/api/create-event", (req, res) => {
     console.log("Creating Event:")
     conn.getConnection(
-        function (err, client) {
+        function (err, client) { //uid and userid are foreign keys (connected)
             const sql = 'INSERT INTO events (eventname, userid, owner, collaborators) VALUES (?, ?, ?, ?)';
-
-            client.query(sql, [req.body.eventname, req.body.userid, req.body.owner, 
-                req.body.collaborators], function(err, result) {
+            console.log("Test " + JSON.stringify(JSON.stringify(req.body.collaborators)))
+            client.query(sql, [req.body.eventname, req.body.userid, req.body.owner,
+                JSON.stringify(req.body.collaborators)], function(err, result) {
                 
-                if (err)
+                if (err) {
                     console.log('Query Error')
-        
+                    console.log(err)
+                }
                 console.log(result)  
                 
                 const data = {
-                    //eventName: result.eventname,
-                    //id: result.eventid
-                    data: "hello"
+                    data: result
                 }            
                 
                 res.send(JSON.stringify(data)) 

@@ -18,6 +18,7 @@ const CreateEvent1 = ({navigate, setError, error, user}) => {
     //-------date selection state -------///
     const [dateCount, setDateCount] = useState(0)    
     const [dateSelected, setDateSelected] = useState(false)
+    //const daysSelected = [] //for keeping track of circled days
     const selection = (dateString) => {
          if (dateCount === 2) {
             console.log("Removed date selections")

@@ -82,7 +82,8 @@ export default function Calendar({
 
 const selectedClickHandler = (dayObject) => {
   //e.preventDefault()
-  //dayObject.isSelected = dateSelected;
+  // if (dateCount === 2)
+  // dayObject.isSelected = true;
   selection(dayObject.dateString) //passed into calendar
 }
 
