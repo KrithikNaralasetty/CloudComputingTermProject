@@ -103,7 +103,7 @@ function App() {
         </ul>
       <Routes>
         <Route path="/" element={<Login Login={Loginx} error={error}/>} />
-        <Route path="/dashboard" element={<Dashboard Logout={Logout} navigate={navigate}/>} />
+        <Route path="/dashboard" element={<Dashboard error={error} setError={setError} user={user} Logout={Logout} navigate={navigate}/>} />
         <Route path="/create-event-1" element={<CreateEvent1 user={user} setError={setError}error={error} navigate={navigate}/>} />
         {/* <Route path="/create-event-2" element={<CreateEvent2 navigate={navigate}/>} /> */}
         <Route path="/event" element={<Event navigate={navigate}/>} />

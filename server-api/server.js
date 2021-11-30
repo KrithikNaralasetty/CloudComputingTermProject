@@ -100,7 +100,7 @@ app.post("/api/create-event", (req, res) => {
     conn.getConnection(
         function (err, client) { //uid and userid are foreign keys (connected)
             const sql = 'INSERT INTO events (eventname, userid, owner, collaborators) VALUES (?, ?, ?, ?)';
-            console.log("Test " + JSON.stringify(JSON.stringify(req.body.collaborators)))
+            //console.log("Test " + JSON.stringify(JSON.stringify(req.body.collaborators)))
             client.query(sql, [req.body.eventname, req.body.userid, req.body.owner,
                 JSON.stringify(req.body.collaborators)], function(err, result) {
                 
@@ -121,6 +121,34 @@ app.post("/api/create-event", (req, res) => {
         })
 
 })
+
+
+app.get("/api/retrieve-events", (req, res) => {
+    console.log("Retrieving Events")
+    conn.getConnection(
+        function (err, client) { //uid and userid are foreign keys (connected)
+            const sql = 'SELECT * FROM events WHERE userid = ?';
+            console.log(req.body.userid)
+            client.query(sql, [req.body.userid], function(err, result) {
+                
+                if (err) {
+                    console.log('Query Error')
+                    console.log(err)
+                }
+                console.log(result)          
+                
+                res.send(JSON.stringify(result)) 
+
+                client.release()
+            })
+        })
+
+})
+
+
+
+
+
 
 
 

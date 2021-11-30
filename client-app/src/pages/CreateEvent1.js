@@ -10,9 +10,9 @@ const CreateEvent1 = ({navigate, setError, error, user}) => {
     const [collaborator, setCollaborator] = useState("") //email
     const [eventDetails, setEventDetails] = useState({
         name: "", //name of event
-        collaborators: [], //array of users
+        collaborators: [user.email], //array of users //added owner by default
         startDate: "",
-        endDate: ""
+        endDate: "" //maybe we should add this to the DB start and end date
     })
 
     //-------date selection state -------///
@@ -71,7 +71,7 @@ const CreateEvent1 = ({navigate, setError, error, user}) => {
                 setError("Email does not exist")
             }
             setCollaborator("") //clears email text-field
-      })
+        })
     }
 
     const submitClickHandler = () => {
@@ -88,7 +88,7 @@ const CreateEvent1 = ({navigate, setError, error, user}) => {
                 console.log("Event created");
                 setError("")
                 console.log(response.data)
-
+                navigate("/dashboard")
             } else {
                 console.log("Page loaded wrong")
                 setError("Post was sent unsucessfully")

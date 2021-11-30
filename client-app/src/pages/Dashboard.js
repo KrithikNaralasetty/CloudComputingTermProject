@@ -1,4 +1,26 @@
-const Dashboard = ({Logout, navigate}) => {
+import React, { useState } from "react";
+import axios from "axios"
+
+const Dashboard = ({Logout, navigate, error, setError, user}) => {
+    
+    const [events, setEvents] = useState([])
+
+    const data = { userid: user.id}
+    console.log(data.userid)
+    // axios.get("http://localhost:4000/api/retrieve-events", data)
+    //     .then(response => {
+    //         if (response.data) {
+    //             console.log("Events retrieved!");
+    //             setError("")
+    //             console.log(response.data)
+    //             setEvents(response.data)
+    //         } else {
+    //             console.log("Events could not be retrieved")
+    //             setError("Events could not be retrieved")
+    //         }
+    //     })
+
+
     return (
         <div className="bg-purple-400 w-full h-screen text-center">
             <h1 className="text-white text-7xl font-bold tracking-tight pt-52">MeetUp</h1>
