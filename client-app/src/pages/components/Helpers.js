@@ -101,3 +101,4 @@ export function getWeekday(dateString) { //returns weekday 0-6 based on date pas
 export function isWeekendDay(dateString) {
   return [6, 0].includes(getWeekday(dateString));
 }
+

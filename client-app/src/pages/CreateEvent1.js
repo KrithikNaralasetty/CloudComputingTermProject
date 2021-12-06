@@ -1,50 +1,87 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Calendar, { CalendarDayHeader } from "./components/Calendar";
 import StepHeader from "./components/StepHeader"
 import {useNavigate} from "react-router-dom"
 import axios from "axios"
+import { getRangeOfDates } from "./components/EventHelpers"
+import dayjs from "dayjs";
+import dayOfYear from "dayjs/plugin/dayOfYear";
+
+dayjs.extend(dayOfYear)
 
 const CreateEvent1 = ({navigate, setError, error, user}) => {
     const [yearAndMonth, setYearAndMonth] = useState([2021, 11]);
     const [nextpage, setNextPage] = useState(false)
+    const [eid, setEid] = useState(0)
     const [collaborator, setCollaborator] = useState("") //email
     const [eventDetails, setEventDetails] = useState({
         name: "", //name of event
         collaborators: [user.email], //array of users //added owner by default
-        startDate: "",
-        endDate: "" //maybe we should add this to the DB start and end date
+        dates: []
     })
 
     //-------date selection state -------///
-    const [dateCount, setDateCount] = useState(0)    
-    const [dateSelected, setDateSelected] = useState(false)
-    //const daysSelected = [] //for keeping track of circled days
+    const [dateCount, setDateCount] = useState(0) 
+    const [startDate, setStartDate] = useState("")
+    const [endDate, setEndDate] = useState("")
+    const [middleDateRange, setMiddleDateRange] = useState([])   
+
     const selection = (dateString) => {
          if (dateCount === 2) {
             console.log("Removed date selections")
             setDateCount(0)
-            setDateSelected(false)
-            setEventDetails({...eventDetails, startDate: "", endDate: ""})
+            setStartDate("")
+            setEndDate("")
+            setMiddleDateRange([])
          }
          else if (dateCount === 0) {
             console.log("FirstDate Selected: " + dateString)
-             setDateSelected(true)
-             setDateCount(1)
-             setEventDetails({...eventDetails, startDate: dateString})
+            setDateCount(1)
+            setStartDate(dateString)
+            console.log("In CreateEvent: startDate= " + startDate)
          }
          else {
-             console.log("SecondDate Selected: " + dateString)
-             setDateSelected(true)
-             setDateCount(2)
-             setEventDetails({...eventDetails, endDate: dateString})
+            console.log("SecondDate Selected: " + dateString)
+            setDateCount(2)
+            setEndDate(dateString)
+            console.log("In CreateEvent: endDate= " + endDate)
+            if(startDate === endDate) { //if only one day selected
+                setEventDetails({...eventDetails, dates: [startDate]})
+            }
+            else {
+                let dateRange = getRangeOfDates(startDate, dateString)
+                //setEventDetails({...eventDetails, dates: dateRange})
+                //make middle date range
+                //console.log(dateRange)
+                dateRange.shift()
+                dateRange.pop()
+                setMiddleDateRange(dateRange) //remove first and last date
+                //console.log(middleDateRange) //these are not coming in on time
+            }   
          }
-    
     }
+
+    useEffect(() => {
+        const dateRange = getRangeOfDates(startDate, endDate)
+        console.log("endDate from useEffect= " + endDate)
+        setEventDetails({...eventDetails, dates: dateRange}) 
+    }, [startDate, endDate])    
 
     const nextClickHandler = e => {
         e.preventDefault()
+        
+        if (dateCount !== 2) {
+            setError("Must pick start and end dates. For only one day, reselect it and continue")
+        }
+        else {
+            setError("")
+            // const dateRange = getRangeOfDates(startDate, endDate)
+            // setEventDetails({...eventDetails, dates: dateRange})
 
-        setNextPage(!nextpage)
+            console.log("next " + eventDetails.dates)
+            
+            setNextPage(!nextpage)
+        }        
     }
     
     const addClickHandler = e => {
@@ -75,25 +112,55 @@ const CreateEvent1 = ({navigate, setError, error, user}) => {
     }
 
     const submitClickHandler = () => {
+
         const event = {
            eventname: eventDetails.name,
            userid: user.id,
            owner:  user.username,
-           collaborators: eventDetails.collaborators 
+           collaborators: eventDetails.collaborators
         }
-
+        
+        console.log(event)
         axios.post("http://localhost:4000/api/create-event", event)
         .then(response => {
             if (response.data) {
                 console.log("Event created");
                 setError("")
                 console.log(response.data)
-                navigate("/dashboard")
+
+                setEid(response.data.eventId)
+                //not being set in time
+                console.log("eid: " + eid)
+
+                //do post in here for timeslots//
+                const timeslotData = {
+                    eventid: response.data.eventId,
+                    collaborators: eventDetails.collaborators,
+                    dates: eventDetails.dates 
+                }
+                console.log("timeslotData.eventid= " + timeslotData.eventid)
+                axios.post("http://localhost:4000/api/create-timeslots", timeslotData)
+                .then(response => {
+                    if (response.data) {
+                        console.log("Timeslots Created!");
+                        setError("")
+                        console.log(response.data)
+                        navigate("/dashboard")
+                    } else {
+                        console.log("Timeslots couldn't be set")
+                        setError("Timeslots couldn't be set")
+                    }
+                }) 
+
+                //post for timeslots in here conditionally
+
             } else {
-                console.log("Page loaded wrong")
-                setError("Post was sent unsucessfully")
+                console.log("Event couldn't be created")
+                setError("Event couldn't be created")
             }
-      }) 
+        }) 
+
+         
     }
 
 
@@ -104,16 +171,20 @@ const CreateEvent1 = ({navigate, setError, error, user}) => {
             <div className="w-1/2 mx-auto">
                 <h1 className="text-white text-7xl font-bold tracking-tight pt-10">MeetUp</h1>
                 <h2 className="text-yellow-300 text-4xl font-medium tracking-wide py-10 border-b-2 ">Create Event</h2>
-                 
             </div>
             
             {/* may want to use if statement with css visbility */}
             {!nextpage &&   
             <div>        
-                <StepHeader num="1" text="Select up to 7 days"/>  
+                <StepHeader num="1" text="Select up to 7 days"/> 
+                {/* <h3>{ if(dateCount) {
+                } From Nov 16 - Nov 18 //trying to display that
+                }</h3>  */}
                 <div className="lg:min-w-auto mx-auto container">
                     <Calendar
-                        dateSelected = {dateSelected}
+                        startDate = {startDate}
+                        middleDateRange = {middleDateRange}
+                        endDate = {endDate}
                         selection = {selection}
                         yearAndMonth={yearAndMonth}
                         onYearAndMonthChange={setYearAndMonth}
@@ -124,6 +195,7 @@ const CreateEvent1 = ({navigate, setError, error, user}) => {
                         )}
                     />
                 </div>
+                {(error !== "") ? ( <div className="py-5 text-xl text-red-200">{error}</div>) : ""}
                 <button onClick={() => { navigate("/dashboard")}} className=" my-10 mx-10 text-4xl border-b-2 border-blue-900 text-blue-900 hover:border-blue-800
                 hover:text-gray-600 cursor-pointer">Cancel</button>
                 <button onClick={nextClickHandler} className=" my-10 text-4xl border-b-2 border-blue-900 text-blue-900 hover:border-blue-800

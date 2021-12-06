@@ -11,14 +11,47 @@ import Event from "./pages/Event"
 import ErrorPage from "./pages/ErrorPage"
 
 function App() {
-
-  
-
   /*--------------Login----------------*/
 
   let navigate = useNavigate()
   const [user, setUser] = useState({username: "", email: "", id: 0})
   const [error, setError] = useState("")
+  const [event, setEvent] = useState()
+  const [timeslots, setTimeslots] = useState()
+
+  const loadEvent = eventDetails => {
+
+    
+    //axios post to get timeslots json object
+    //need to restructure object to be:
+    // collaborator0: [timeslot0, timeslot1, ...]
+    // collaborator1
+    // let server handle parsing the data and making object
+
+    setEvent(eventDetails) //pass event details to event page
+
+
+    // axios.post("http://localhost:4000/api/retrieve-timeslots", {eventDetails})
+    //   .then(response => {
+    //     if (response.data) {
+    //       console.log("Timeslots received");
+    //       setError("")
+    //       setTimeslots(response.data)  
+
+    //       console.log("Timeslots" + response.data) 
+    //       navigate(`/event/${eventDetails.userid}`)
+    //     } else {
+    //       console.log("Couldn't retrieve-timeslots")
+    //       setError("Couldn't retrieve-timeslots")
+    //     }
+    //   })
+    //   .catch(error => {
+    //     console.log(error)
+    //     setError(error.message)
+    //   }) 
+
+    
+  }
 
   const Loginx = details => {
       console.log(details)
@@ -56,32 +89,6 @@ function App() {
       console.log("Logout")
   }
 
-  
-  // const addCollaborator = user_data => {
-  //     console.log("Checking if email valid:" + user_email)
-  //     //email good up here
-  //     const email = { email: user_email}
-  //     axios.post("http://localhost:4000/api/validate-email", email)
-  //     .then(response => {
-  //       if (response.data) {
-  //         console.log("Correct Collaborator email");
-  //         setError("")
-  //         console.log(response.data)
-  //         //return response.data //returns an object record of user
-
-  //       } else {
-  //         console.log("No email match")
-  //         setError("Email does not exist")
-
-  //         //return false Doesn't work.
-  //       }
-  //     })
-  //     .catch(error => {
-  //       console.log(error)
-  //       setError(error.message)
-  //     }) 
-  // }
-
   return (
     <div>
       <ul>
@@ -103,10 +110,10 @@ function App() {
         </ul>
       <Routes>
         <Route path="/" element={<Login Login={Loginx} error={error}/>} />
-        <Route path="/dashboard" element={<Dashboard error={error} setError={setError} user={user} Logout={Logout} navigate={navigate}/>} />
+        <Route path="/dashboard" element={<Dashboard error={error} setError={setError} user={user} Logout={Logout} navigate={navigate} loadEvent={loadEvent}/>} />
         <Route path="/create-event-1" element={<CreateEvent1 user={user} setError={setError}error={error} navigate={navigate}/>} />
         {/* <Route path="/create-event-2" element={<CreateEvent2 navigate={navigate}/>} /> */}
-        <Route path="/event" element={<Event navigate={navigate}/>} />
+        <Route path="/event" element={<Event navigate={navigate} event={event} timeslots={timeslots}/>} />
         {/* <Route path="*" element={<ErrorPage />} /> */}
       </Routes>
     </div>    

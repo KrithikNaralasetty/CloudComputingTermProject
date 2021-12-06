@@ -100,7 +100,7 @@ app.post("/api/create-event", (req, res) => {
     conn.getConnection(
         function (err, client) { //uid and userid are foreign keys (connected)
             const sql = 'INSERT INTO events (eventname, userid, owner, collaborators) VALUES (?, ?, ?, ?)';
-            //console.log("Test " + JSON.stringify(JSON.stringify(req.body.collaborators)))
+
             client.query(sql, [req.body.eventname, req.body.userid, req.body.owner,
                 JSON.stringify(req.body.collaborators)], function(err, result) {
                 
@@ -108,49 +108,112 @@ app.post("/api/create-event", (req, res) => {
                     console.log('Query Error')
                     console.log(err)
                 }
-                console.log(result)  
-                
-                const data = {
-                    data: result
-                }            
-                
-                res.send(JSON.stringify(data)) 
-
-                client.release()
-            })
-        })
-
+                console.log(result.insertId) //eventId that will be returned
+                res.send(JSON.stringify({eventId: result.insertId}))
+                client.release()          
+            }) 
+        })       
 })
 
 
-app.get("/api/retrieve-events", (req, res) => {
+app.post("/api/create-timeslots", (req, res) => {
+    console.log("Creating and inserting Timslots:")
+    console.log("server req.body.eventid=" + req.body.eventid)
+    const collaborators = req.body.collaborators //check if collaborators needs to be parsed? 
+    const dates = req.body.dates //need to add this when called
+    let ctr = 0
+    conn.getConnection(
+        function (err, client) { //uid and userid are foreign keys (connected)
+            for (const collaborator of collaborators) {
+                for (const date of dates) {
+                    for (let hour = 0; hour < 24; hour++) {
+                        const sql = 'INSERT INTO event_times (eventid, timeslot, day, owner, occupied) VALUES (?, ?, ?, ?, ?)';
+            
+                        client.query(sql, [req.body.eventid, hour, date, collaborator, 0], 
+                            //collaborator should be email, and timeslot is hour.
+                        function(err, result) {
+                            
+                            if (err) {
+                                console.log('Query Error')
+                                console.log(err)
+                            }
+                            else {
+                                console.log("Inserted " + ctr + " Timeslots") 
+                            } 
+                        })
+                    }
+                }
+            }
+            res.send(JSON.stringify({message: "successful"}))
+            console.log("Finished Inserting Timeslots for Event")
+            client.release()  
+        })
+})
+
+
+
+app.post("/api/retrieve-events", (req, res) => {
     console.log("Retrieving Events")
     conn.getConnection(
         function (err, client) { //uid and userid are foreign keys (connected)
-            const sql = 'SELECT * FROM events WHERE userid = ?';
-            console.log(req.body.userid)
-            client.query(sql, [req.body.userid], function(err, result) {
+            const sql = 'SELECT * FROM events';
+            //console.log("Dog " + req.body.userid)
+            client.query(sql, function(err, result) {
                 
                 if (err) {
                     console.log('Query Error')
                     console.log(err)
                 }
-                console.log(result)          
+                console.log(result)        
                 
-                res.send(JSON.stringify(result)) 
+                let events = []
+                for (const event of result) {
+                    const emails = JSON.parse(event.collaborators)
+                    //console.log("emails: " + emails)
+                    //console.log("user email: " + req.body.email)
+                    if (emails.includes(req.body.email)) //if user is a part of any of event, display it
+                        events.push(event)
+                }
+
+                
+                res.send(JSON.stringify(events)) 
 
                 client.release()
             })
         })
-
 })
 
+app.post("/api/retrieve-timeslots", (req, res) => {
+    console.log("Retrieving timeslots:")
+    let ownerAndTimeslots = [] // = [ {owner: axan, slots: [{}, {}, {}, ...]}, ...]
+    const collaborators = req.body.collaborators //check if collaborators needs to be parsed? 
 
+    //needs to be by date first then split up by owner
+    for (const collaborator of collaborators) { //"owner" in event_times table means "email", so I'll need to store email when inserting
+        conn.getConnection(
+            function (err, client) { //uid and userid are foreign keys (connected)
+                const sql = 'SELECT * FROM event_times WHERE eventid = ? owner = ?';
+                client.query(sql, [req.body.userid, collaborator], function(err, result) {
+                    
+                    if (err) {
+                        console.log('Query Error')
+                        console.log(err)
+                    }
+                    console.log(result)  //all records for user (array of objects)
+                      
+                    const user = {
+                        owner: collaborator,
+                        slots: result
+                    }
+                    ownerAndTimeslots.push(user)
 
-
-
-
-
+                    client.release()
+                })
+            })
+    }
+    
+    res.send(JSON.stringify(ownerAndTimeslots)) 
+})
 
 
 app.get('*', (req, res) => {

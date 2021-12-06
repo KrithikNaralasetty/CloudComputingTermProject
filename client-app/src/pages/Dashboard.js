@@ -1,24 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios"
 
-const Dashboard = ({Logout, navigate, error, setError, user}) => {
+const Dashboard = ({Logout, navigate, error, setError, user, loadEvent }) => {
     
     const [events, setEvents] = useState([])
 
-    const data = { userid: user.id}
-    console.log(data.userid)
-    // axios.get("http://localhost:4000/api/retrieve-events", data)
-    //     .then(response => {
-    //         if (response.data) {
-    //             console.log("Events retrieved!");
-    //             setError("")
-    //             console.log(response.data)
-    //             setEvents(response.data)
-    //         } else {
-    //             console.log("Events could not be retrieved")
-    //             setError("Events could not be retrieved")
-    //         }
-    //     })
+    const data = { email: user.email}
+    //console.log(data.userid)
+
+    const eventPageHandler = (event) => {
+        loadEvent(event)
+    }
+
+
+    useEffect(() => {
+        axios.post("http://localhost:4000/api/retrieve-events", data) //always post when sending data
+        .then(response => {
+            if (response.data) {
+                console.log("Events retrieved!");
+                setError("")
+                //console.log(response.data)
+
+                setEvents(response.data)
+                console.log(events)
+            } else {
+                console.log("Events could not be retrieved")
+                setError("Events could not be retrieved")
+            }
+        })
+    }, []) //don't know how to only run this once asnychrnously
+    
 
 
     return (
@@ -34,8 +45,18 @@ const Dashboard = ({Logout, navigate, error, setError, user}) => {
                     </button>
                 </div>
                 <div className=" w-96">
-                    <h3 className="text-white text-3xl font-semibold text-left mb-4">Invites</h3>
-                    <div className="w-full h-full bg-gray-500">Inivitations Here<br></br> Can accept/decline</div>
+                    <h3 className="text-white text-3xl font-semibold text-left mb-4">Events</h3>
+                    <div className="w-full h-full rounded-md shadow-md bg-blue-900">
+                        {events.map((event) => (
+                            <div key={event.id} className="text-white text-left ">
+                                <div className="p-4">
+                                    <h4 onClick={eventPageHandler(event)} className="text-2xl underline">{event.eventname}</h4>
+                                    <p className="text-xl">By {event.owner}</p>
+                                </div>
+                                
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
             

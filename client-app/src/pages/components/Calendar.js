@@ -22,9 +22,10 @@ Calendar.propTypes = { //This is basically the parameters you need to pass when 
 };
 
 export default function Calendar({
-  dateSelected, //whether or not selected, determines if circle styles will load.
+  startDate, endDate, //whether or not selected, determines if circle styles will load.
   selection, //selection state func
   className = "",
+  middleDateRange,
   yearAndMonth = [2021, 9],
   onYearAndMonthChange,
   renderDay = () => null
@@ -81,13 +82,19 @@ export default function Calendar({
 //send details once click next is set
 
 const selectedClickHandler = (dayObject) => {
-  //e.preventDefault()
-  // if (dateCount === 2)
-  // dayObject.isSelected = true;
   selection(dayObject.dateString) //passed into calendar
 }
 
+const isMiddleDate = (date) => {
+  for (const day of middleDateRange) {
+    if (day === date)
+      return true
+  }
+}
 
+const isFirstOrLastDate = (date) => {
+  return (startDate === date || endDate === date)
+}
 
 
 //-------------------------/////
@@ -142,21 +149,20 @@ const selectedClickHandler = (dayObject) => {
         {calendarGridDayObjects.map((day) => (
           <div
             key={day.dateString}
-            className={classNames("day-grid-item-container flex flex-col relative p-5 hover:text-opacity-50", {
+            className={classNames("day-grid-item-container flex flex-col relative p-2 hover:text-opacity-50", {
               "weekend-day": isWeekendDay(day.dateString), //if true, then add class to list
-              "text-white text-opacity-100": day.isCurrentMonth // if is current month, add those classes to list. true false
+              "text-white text-opacity-100": day.isCurrentMonth, // if is current month, add those classes to list. true false
+            
             })}
           >
             <div onClick={() => selectedClickHandler(day)} 
-            className="day-content-wrapper relative min-h-0">
-              {renderDay(day)} 
-            </div>
-            {/* <div onClick={() => selectedClickHandler(day)} 
-            className={classNames("day-content-wrapper relative min-h-0", {
-              "border-2 rounded-full border-white": dateSelected
+            className={classNames("day-content-wrapper relative min-h-0 p-4", {
+              "bg-blue-900 rounded-full shadow-md": isFirstOrLastDate(day.dateString),
+              "border-2 rounded-full border-dotted border-blue-900": isMiddleDate(day.dateString)
+              
             })}>
               {renderDay(day)}
-            </div> */}
+            </div>
           </div>
         ))}
       </div>
