@@ -1,6 +1,11 @@
 # syntax=docker/dockerfile:1
 FROM node:latest
 WORKDIR /app
+
+COPY ["package.json", "package-lock.json", "./"]
+RUN npm install --production
 COPY . .
-RUN yarn install --production
+
+EXPOSE 4000
+
 CMD ["node", "server.js"]
