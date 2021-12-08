@@ -29,6 +29,8 @@ Vagrant.configure("2") do |config|
     apt-get update
     apt-get install -y apache2
     apt-get install -y docker.io
+    curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+    apt install nodejs
     git init
     git remote add origin "https://github.com/KrithikNaralasetty/CloudComputingTermProject.git"
     git pull origin main
