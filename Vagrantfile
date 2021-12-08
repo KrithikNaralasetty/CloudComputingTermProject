@@ -28,7 +28,10 @@ Vagrant.configure("2") do |config|
     sudo -i
     apt-get update
     apt-get install -y apache2
-    apt-get install docker.io | echo "y"
+    apt-get install -y docker.io
+    git init
+    git remote add origin "https://github.com/KrithikNaralasetty/CloudComputingTermProject.git"
+    git pull origin main
     bash ./docker_init.sh
   SHELL
 end
