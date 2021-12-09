@@ -11,3 +11,5 @@ The code would basically be set up as
 - Creating the docker containers
 
 - deploying the application
+
+Read the report for more information on how to set it up
