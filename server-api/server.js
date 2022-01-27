@@ -99,10 +99,9 @@ app.post("/api/create-event", (req, res) => {
     console.log("Creating Event:")
     conn.getConnection(
         function (err, client) { //uid and userid are foreign keys (connected)
-            const sql = 'INSERT INTO events (eventname, userid, owner, collaborators) VALUES (?, ?, ?, ?)';
-
+            const sql = 'INSERT INTO events (eventname, userid, owner, collaborators, dates) VALUES (?, ?, ?, ?, ?)';
             client.query(sql, [req.body.eventname, req.body.userid, req.body.owner,
-                JSON.stringify(req.body.collaborators)], function(err, result) {
+                JSON.stringify(req.body.collaborators), JSON.stringify(req.body.dates)], function(err, result) {
                 
                 if (err) {
                     console.log('Query Error')
@@ -138,6 +137,7 @@ app.post("/api/create-timeslots", (req, res) => {
                                 console.log(err)
                             }
                             else {
+                                ctr += 1;
                                 console.log("Inserted " + ctr + " Timeslots") 
                             } 
                         })
@@ -166,13 +166,16 @@ app.post("/api/retrieve-events", (req, res) => {
                 }
                 console.log(result)        
                 
-                let events = []
+                let events = [];
                 for (const event of result) {
                     const emails = JSON.parse(event.collaborators)
                     //console.log("emails: " + emails)
                     //console.log("user email: " + req.body.email)
-                    if (emails.includes(req.body.email)) //if user is a part of any of event, display it
+                    if (emails.includes(req.body.email)) { //if user is a part of any of event, display it
+                        // const dates = JSON.parse(event.dates)
+                        // event.dates = dates //parse the dates
                         events.push(event)
+                    }
                 }
 
                 
@@ -183,36 +186,56 @@ app.post("/api/retrieve-events", (req, res) => {
         })
 })
 
-app.post("/api/retrieve-timeslots", (req, res) => {
-    console.log("Retrieving timeslots:")
-    let ownerAndTimeslots = [] // = [ {owner: axan, slots: [{}, {}, {}, ...]}, ...]
-    const collaborators = req.body.collaborators //check if collaborators needs to be parsed? 
 
-    //needs to be by date first then split up by owner
-    for (const collaborator of collaborators) { //"owner" in event_times table means "email", so I'll need to store email when inserting
-        conn.getConnection(
-            function (err, client) { //uid and userid are foreign keys (connected)
-                const sql = 'SELECT * FROM event_times WHERE eventid = ? owner = ?';
-                client.query(sql, [req.body.userid, collaborator], function(err, result) {
-                    
-                    if (err) {
-                        console.log('Query Error')
-                        console.log(err)
-                    }
-                    console.log(result)  //all records for user (array of objects)
-                      
-                    const user = {
-                        owner: collaborator,
-                        slots: result
-                    }
-                    ownerAndTimeslots.push(user)
-
-                    client.release()
-                })
-            })
+get_timeslots = async (client, eid, collaborators, ownerTimeslots) => {
+    for (const collaborator of collaborators) {
+         const sql = 'SELECT * FROM event_times WHERE eventid = ? AND day = ? AND owner = ?';       
+            try {
+                const result = await client.promise().query(sql, [eid, day, collaborator])    
+                const user = {
+                    owner: collaborator,
+                    slots: result[0] //array of timeslots hours 
+                }
+                ownerTimeslots.push(user)  
+            }
+            catch(err) {
+                console.log('Query Error')
+                console.log(err)
+            }
     }
-    
-    res.send(JSON.stringify(ownerAndTimeslots)) 
+}
+
+app.post("/api/retrieve-timeslots", async (req, res) => {
+    try {
+        console.log("Retrieving timeslots:")
+        const dateOwnerAndTimeslots = [] // = [ {owner: axan, slots: [{}, {}, {}, ...]}, ...] 
+        const collaborators = JSON.parse(req.body.collaborators)
+        const dates = JSON.parse(req.body.dates)
+
+        //needs to be by date first then split up by owner
+        conn.getConnection( async function (err, client) { //returns callback, maybe do await on this too? Will need to change dbConnect.js export maybe
+            for (day of dates) {
+                const ownerTimeslots = [];
+                
+                await get_timeslots(client, req.body.eventid, collaborators, ownerTimeslots) 
+
+                const d = {
+                    day: day, //comes from for of loop
+                    user: ownerTimeslots
+                }
+                
+                dateOwnerAndTimeslots.push(d) //end up with array of days objects
+                //structure: data[0].user[0].slot[0]
+            }        
+
+            console.log("Timeslot Object Created:\n" + dateOwnerAndTimeslots)
+            client.release() 
+            res.send(JSON.stringify(dateOwnerAndTimeslots))
+        })  
+    }
+    catch(err) {
+        console.log(err)
+    }  
 })
 
 
@@ -225,3 +248,47 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
 });
+
+
+
+
+
+//const sql = 'SELECT * FROM event_times WHERE eventid = ? AND day = ? AND owner = ?';
+    // return new Promise((resolve, reject) => {
+    //     client.query(sql, [eid, day, collaborator], function(err, result) {    
+    //         if (err) {
+    //             console.log('Query Error')
+    //             console.log(err)
+    //         }
+    //         return {
+    //             owner: collaborator,
+    //             slots: result //array of timeslots hours 
+    //         }
+    //     }) 
+    // })
+
+    
+
+    // const result = await client.promise().query(sql, [eid, day, collaborator])
+        
+    //     return {
+    //             owner: collaborator,
+    //             slots: result //array of timeslots hours 
+    //             }
+    
+    // const userTimeslots = await client.promise().query(sql, [eid, day, collaborator])
+    // //console.log(userTimeslots) 
+
+
+    // client.promise().query(sql, [req.body.eventid, day, collaborator])
+            //   .then((result) => {
+            //     //console.log(result)
+            //     const user = {
+            //         owner: collaborator,
+            //         slots: result //array of timeslots hours
+            //     }
+            //     ownerTimeslots.push(user) //array of owners for day
+            // }).catch((err) => {
+            //     console.log('Query Error')
+            //     console.log(err) 
+            // })

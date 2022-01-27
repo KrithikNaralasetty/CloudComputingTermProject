@@ -10,13 +10,13 @@ dayjs.extend(dayOfYear);
 //get: .year(), .month(), .date(), can also use set
 
 //sample event object
-const event = {
-    eventName: "Holiday Reunion",
-    firstDate: "2021-11-16", //can extract year, month, day from here
-    lastDate: "2021-11-18", //after extracting days, implies 16-18 or 16, 17, 18
-    collabNames: ["Aristos", "Krithik", "Alex"] //can find #of people based on array locally
-    //will need to pass in objects for each collaborator showing their availablity.
-}
+// const event = {
+//     eventName: "Holiday Reunion",
+//     firstDate: "2021-11-16", //can extract year, month, day from here
+//     lastDate: "2021-11-18", //after extracting days, implies 16-18 or 16, 17, 18
+//     collabNames: ["Aristos", "Krithik", "Alex"] //can find #of people based on array locally
+//     //will need to pass in objects for each collaborator showing their availablity.
+// }
 
 
 const getMonth = (dateString) => {
@@ -38,7 +38,7 @@ const TimeGrid = ({numCollabs = 3}) => {
 }
 
 
-const TimeTable = ({eventz}) => { //I think it has to deal with props?
+const TimeTable = ({event}) => { //I think it has to deal with props?
     //let { eventName, firstDate, lastDate, collabNames } = eventz
     
     const numCollabs = Array(event.collabNames).length;
@@ -77,7 +77,8 @@ const TimeTable = ({eventz}) => { //I think it has to deal with props?
 }
 
 
-export default function Event() {
+export default function Event({navigate, event, timeslots}) {
+    console.log("event" + event)
     //should be passed in year, month, range of days (eg. 1-4)
     //also, collaborators' names based on accounts (Aristos, Krithik, Alex) and number of people for grid divisions
 
@@ -86,11 +87,11 @@ export default function Event() {
         <div className="bg-purple-400 w-full h-screen text-center">
             <div className="w-1/2 mx-auto">
                 <h1 className="text-white text-7xl font-bold tracking-tight pt-10">MeetUp</h1>
-                <h2 className="text-yellow-300 text-4xl font-medium tracking-wide py-10 ">{event.eventName} | Nov 13-17, 2021</h2>
-                <h3 className="text-blue-900 text-3xl tracking-wide py-10 border-b-2 ">By Aristos</h3>
+                <h2 className="text-yellow-300 text-4xl font-medium tracking-wide pt-10 pb-5">{event.eventname}</h2>
+                <h3 className="text-blue-900 text-3xl tracking-wide py-10 border-b-2 ">By {event.owner}</h3>
             </div>
-            <TimeTable event={event}/>
-            <button className=" my-10 text-4xl border-b-2 border-blue-900 text-blue-900 hover:border-blue-800
+            <TimeTable event={event}/> 
+            <button onClick={() => {navigate("/Dashboard")}} className=" my-10 text-4xl border-b-2 border-blue-900 text-blue-900 hover:border-blue-800
              hover:text-gray-600 cursor-pointer">Back</button>
         </div>
     )

@@ -50,7 +50,7 @@ const Dashboard = ({Logout, navigate, error, setError, user, loadEvent }) => {
                         {events.map((event) => (
                             <div key={event.id} className="text-white text-left ">
                                 <div className="p-4">
-                                    <h4 onClick={eventPageHandler(event)} className="text-2xl underline">{event.eventname}</h4>
+                                    <button onClick={() => {eventPageHandler(event)}} className="text-2xl underline">{event.eventname}</button>
                                     <p className="text-xl">By {event.owner}</p>
                                 </div>
                                 

@@ -38,7 +38,7 @@ const CreateEvent1 = ({navigate, setError, error, user}) => {
             console.log("FirstDate Selected: " + dateString)
             setDateCount(1)
             setStartDate(dateString)
-            console.log("In CreateEvent: startDate= " + startDate)
+            console.log("In CreateEvent: startDate= " + startDate) //outputs not set?
          }
          else {
             console.log("SecondDate Selected: " + dateString)
@@ -50,7 +50,8 @@ const CreateEvent1 = ({navigate, setError, error, user}) => {
             }
             else {
                 let dateRange = getRangeOfDates(startDate, dateString)
-                //setEventDetails({...eventDetails, dates: dateRange})
+                //setEventDetails({...eventDetails, dates: dateRange}) //doesn't work in here why? some async thing with useState?
+                console.log(eventDetails.dates)
                 //make middle date range
                 //console.log(dateRange)
                 dateRange.shift()
@@ -63,9 +64,9 @@ const CreateEvent1 = ({navigate, setError, error, user}) => {
 
     useEffect(() => {
         const dateRange = getRangeOfDates(startDate, endDate)
-        console.log("endDate from useEffect= " + endDate)
         setEventDetails({...eventDetails, dates: dateRange}) 
-    }, [startDate, endDate])    
+
+    }, [startDate, endDate])  //how to get ride of error? 
 
     const nextClickHandler = e => {
         e.preventDefault()
@@ -117,7 +118,8 @@ const CreateEvent1 = ({navigate, setError, error, user}) => {
            eventname: eventDetails.name,
            userid: user.id,
            owner:  user.username,
-           collaborators: eventDetails.collaborators
+           collaborators: eventDetails.collaborators,
+           dates: eventDetails.dates
         }
         
         console.log(event)
@@ -162,9 +164,6 @@ const CreateEvent1 = ({navigate, setError, error, user}) => {
 
          
     }
-
-
-
 
     return (
         <div className="bg-purple-400 w-full h-full text-center">

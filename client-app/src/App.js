@@ -17,40 +17,30 @@ function App() {
   const [user, setUser] = useState({username: "", email: "", id: 0})
   const [error, setError] = useState("")
   const [event, setEvent] = useState()
-  const [timeslots, setTimeslots] = useState()
+  const [timeslots, setTimeslots] = useState() //nested object array
 
   const loadEvent = eventDetails => {
 
-    
-    //axios post to get timeslots json object
-    //need to restructure object to be:
-    // collaborator0: [timeslot0, timeslot1, ...]
-    // collaborator1
-    // let server handle parsing the data and making object
-
     setEvent(eventDetails) //pass event details to event page
 
+    axios.post("http://localhost:4000/api/retrieve-timeslots", eventDetails)
+      .then(response => {
+        if (response.data) {
+          console.log("Timeslot Array Object received");
+          setError("")
+          setTimeslots(response.data)  
 
-    // axios.post("http://localhost:4000/api/retrieve-timeslots", {eventDetails})
-    //   .then(response => {
-    //     if (response.data) {
-    //       console.log("Timeslots received");
-    //       setError("")
-    //       setTimeslots(response.data)  
-
-    //       console.log("Timeslots" + response.data) 
-    //       navigate(`/event/${eventDetails.userid}`)
-    //     } else {
-    //       console.log("Couldn't retrieve-timeslots")
-    //       setError("Couldn't retrieve-timeslots")
-    //     }
-    //   })
-    //   .catch(error => {
-    //     console.log(error)
-    //     setError(error.message)
-    //   }) 
-
-    
+          console.log(timeslots) 
+          navigate(`/events/${eventDetails.eventname}`) //can later add /event/49 (:id)
+        } else {
+          console.log("Couldn't retrieve-timeslots")
+          setError("Couldn't retrieve-timeslots")
+        }
+      })
+      .catch(error => {
+        console.log(error)
+        setError(error.message)
+      }) 
   }
 
   const Loginx = details => {
@@ -101,20 +91,16 @@ function App() {
           <li>
             <Link to="/create-event-1">Create-Event-1</Link>
           </li>
-          {/* <li>
-            <Link to="/create-event-2">Create-Event-2</Link>
-          </li> */}
           <li>
-            <Link to="/event">Event</Link>
+            <Link to="/events">Event</Link>
           </li>
         </ul>
       <Routes>
         <Route path="/" element={<Login Login={Loginx} error={error}/>} />
         <Route path="/dashboard" element={<Dashboard error={error} setError={setError} user={user} Logout={Logout} navigate={navigate} loadEvent={loadEvent}/>} />
         <Route path="/create-event-1" element={<CreateEvent1 user={user} setError={setError}error={error} navigate={navigate}/>} />
-        {/* <Route path="/create-event-2" element={<CreateEvent2 navigate={navigate}/>} /> */}
-        <Route path="/event" element={<Event navigate={navigate} event={event} timeslots={timeslots}/>} />
-        {/* <Route path="*" element={<ErrorPage />} /> */}
+        <Route path="/events/:name" element={<Event navigate={navigate} event={event} timeslots={timeslots}/>} />
+        {/* <Route element={<ErrorPage />} /> */}
       </Routes>
     </div>    
   );
