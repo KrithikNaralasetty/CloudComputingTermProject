@@ -1,6 +1,6 @@
 # CloudComputingTermProject
 
-## Alex Te (ate@scu.edu), Aristos Xanthus (axanthus@scu.edu), Krithik Naralasetty (knaralasetty@scu.edu)
+## Alex Te (ate@scu.edu), Aristos Xanthus (axanthus@scu.edu), Krithik Naralasetty (<email_removed>)
 
 Start with the host_main.sh file and then go from there
 
